@@ -268,6 +268,7 @@ def clip_message_and_obs(msg):
             if type(curr_msg['content']) == str:
                 clipped_msg = f"{curr_msg['role']}: " + curr_msg['content'] + '\n' + clipped_msg
             else:
+                '''
                 msg_no_pdf = curr_msg['content'].split("Observation:")[0].strip() + "Observation: A screenshot and some texts. (Omitted in context.)"
                 msg_pdf = curr_msg['content'].split("Observation:")[0].strip() + "Observation: A screenshot, a PDF file and some texts. (Omitted in context.)"
                 curr_msg_clip = {
@@ -275,6 +276,8 @@ def clip_message_and_obs(msg):
                     'content': msg_no_pdf if "You downloaded a PDF file" not in curr_msg['content'][0]["text"] else msg_pdf
                 }
                 clipped_msg = f"{curr_msg_clip['role']}: " + curr_msg_clip['content'] + '\n' + clipped_msg
+                '''
+                print(curr_msg['content'])
     return clipped_msg
 
 
@@ -290,6 +293,7 @@ def clip_message_and_obs_text_only(msg, max_tree_num):
                 tree_num += 1
                 clipped_msg = f"{curr_msg['role']}: " + curr_msg['content'] + '\n' + clipped_msg
             else:
+                
                 msg_no_pdf = curr_msg['content'].split("Observation:")[0].strip() + "Observation: An accessibility tree. (Omitted in context.)"
                 msg_pdf = curr_msg['content'].split("Observation:")[0].strip() + "Observation: An accessibility tree and a PDF file. (Omitted in context.)"
                 curr_msg_clip = {
@@ -433,7 +437,7 @@ def get_pdf_retrieval_ans_from_gemini(args, client, pdf_path, task):
                     temperature=args.temperature
                 )
             )
-        print(response.text)
+        #print(response.text)
         return response.text
     except Exception as e:
         logging.error(f"Error generating content with Gemini API: {e}")

@@ -6,6 +6,7 @@ import re
 import os
 import shutil
 import logging
+import sys
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -16,8 +17,15 @@ from prompts import SYSTEM_PROMPT, SYSTEM_PROMPT_TEXT_ONLY
 from openai import OpenAI
 from google import genai
 from google.genai import types
+from google.api_core import exceptions as google_exceptions
 from utils import get_web_element_rect, encode_image, extract_information, print_message,\
     get_webarena_accessibility_tree, get_pdf_retrieval_ans_from_assistant, clip_message_and_obs, clip_message_and_obs_text_only, get_pdf_retrieval_ans_from_gemini
+    
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
 
 
 def setup_logger(folder_path):
@@ -169,9 +177,14 @@ def call_gemini_api(args, gemini_client, messages, img):
                     system_instruction=system_instruct
                 )
             )
-            print(gemini_response)
             call_error = False
+            #print(gemini_response.text)
             return call_error, gemini_response.text
+        
+        except google_exceptions.ResourceExhausted as e: #偵測是否超過上限
+            logging.info(f'Resource exhausted (rate limit or quota exceeded), retrying. Error: {e}')
+            time.sleep(60) #增加等待時間，確保限制重置
+            return True, None #回傳True, 表示錯誤發生
 
         except Exception as e:
             logging.info(f'Error occurred, retrying. Error type: {type(e).__name__}')
@@ -285,8 +298,8 @@ def main():
     parser.add_argument("--headless", action='store_true', help='The window of selenium')
     parser.add_argument("--save_accessibility_tree", action='store_true')
     parser.add_argument("--force_device_scale", action='store_true')
-    parser.add_argument("--window_width", type=int, default=2048)
-    parser.add_argument("--window_height", type=int, default=900)  # for headless mode, there is no address bar
+    parser.add_argument("--window_width", type=int, default=3096)
+    parser.add_argument("--window_height", type=int, default=1000)  # for headless mode, there is no address bar
     parser.add_argument("--fix_box_color", action='store_true')
 
     args = parser.parse_args()
@@ -547,7 +560,8 @@ def main():
                 else:
                     fail_obs = ""
                 time.sleep(2)
-
+        print(info['content'])
+        print('\t\t\t')
         print_message(history_messages, task_dir)
         driver_task.quit()
         #logging.info(f'Total cost: {accumulate_prompt_token / 1000 * 0.01 + accumulate_completion_token / 1000 * 0.03}')
