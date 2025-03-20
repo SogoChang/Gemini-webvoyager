@@ -15,11 +15,12 @@ We use Selenium to build the online web browsing environment.
 ## How to Run
 
 After setting up the environment, you can start running the code. 
-It's simple to run our code. Modify your Gemini api_key in `run.sh` 
+It's simple to run the code. 
 ```bash 
-bash run.sh
+python main.py --api_key YOUR_API_KEY
 ```
 The conversations of webvoyager and log file will be put inside the results folder, corresponding to the task name provide by brain agent.
+The conversations of brain agent will be put inside the brain_results folder.
 
 ## File introduction
 - `main.py` run the brain agent.
