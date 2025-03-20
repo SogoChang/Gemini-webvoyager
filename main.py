@@ -45,7 +45,7 @@ if __name__ == "__main__":
                         config = types.GenerateContentConfig(
                             max_output_tokens=1000,
                             temperature=0.5,
-                            system_instruction=DEMO_PROMPT
+                            system_instruction=BRAIN_PROMPT
                         )
                     )
         print(response.text)

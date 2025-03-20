@@ -1,0 +1,5 @@
+INFO - ########## TASKtainan_attractions ##########
+INFO - Iter: 0
+INFO - Calling Gemini API...
+INFO - AFC is enabled with max remote calls: 10.
+INFO - Error occurred, retrying. Error type: ServerError

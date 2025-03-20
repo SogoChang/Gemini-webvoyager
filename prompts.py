@@ -71,6 +71,9 @@ Key Guidelines You MUST follow:
 2) Vsit video websites like YouTube is allowed BUT you can't play videos. Clicking to download PDF is allowed and will be analyzed by the Assistant API.
 3) Focus on the date in task, you must look for results that match the date. It may be necessary to find the correct year, month and day at calendar.
 4) Pay attention to the filter and sort functions on the page, which, combined with scroll, can help you solve conditions like 'highest', 'cheapest', 'lowest', 'earliest', etc. Try your best to find the answer that best fits the task.
+* Web Browsing Tips *
+1) You can try many different websites to find the informations that you are searching for
+2) Make sure you scroll the whole page before saying you can't find the information
 
 Your reply should strictly follow the format:
 Thought: {Your brief thoughts (briefly summarize the info that will help ANSWER)}
@@ -96,6 +99,7 @@ You have the following actions available to achieve the above process:
 
 Correspondingly, Action should STRICTLY follow the format:
 - Query; {"web_name": [name of the web], "id": [give the task a name], "ques": [the content of the task], "web": [url of the websites]}
+* Example: {"web_name": "Google", "id": "searching", "ques": "search", "web": "https://www.google.com"}
 - Ask; [question you want to ask]
 - Answer; [your response]
 
@@ -106,7 +110,6 @@ Key Guidelines You MUST follow:
 2) The Query must strictly follow the provided JSON format.  
 3) The Query "id" must not be duplicated. 
 4) When using Action-Query, you can choose only one website and you MUST provide a url that can be used. If you have no idea about the "web", put "https://www.google.com".
-5) 
 
 Your reply should strictly follow the format:
 Thought: {Your brief thoughts (briefly summarize the info that will help ANSWER)}

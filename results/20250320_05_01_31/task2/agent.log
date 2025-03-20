@@ -1,0 +1,33 @@
+INFO - ########## TASK2 ##########
+INFO - Iter: 0
+INFO - Calling Gemini API...
+INFO - AFC is enabled with max remote calls: 10.
+INFO - AFC remote call 1 is done.
+INFO - Gemini API call complete...
+INFO - Num of interactive elements: 19
+INFO - Iter: 1
+INFO - Calling Gemini API...
+INFO - AFC is enabled with max remote calls: 10.
+INFO - AFC remote call 1 is done.
+INFO - Gemini API call complete...
+INFO - Num of interactive elements: 33
+INFO - Iter: 2
+INFO - Calling Gemini API...
+INFO - AFC is enabled with max remote calls: 10.
+INFO - AFC remote call 1 is done.
+INFO - Gemini API call complete...
+INFO - Num of interactive elements: 30
+INFO - Iter: 3
+INFO - Calling Gemini API...
+INFO - AFC is enabled with max remote calls: 10.
+INFO - AFC remote call 1 is done.
+INFO - Gemini API call complete...
+INFO - Num of interactive elements: 25
+INFO - Iter: 4
+INFO - Calling Gemini API...
+INFO - AFC is enabled with max remote calls: 10.
+INFO - AFC remote call 1 is done.
+INFO - Gemini API call complete...
+INFO - Num of interactive elements: 33
+INFO - The Maokong Gondola ride takes 20-30 minutes. The amount of time to visit Maokong depends on individual preference.
+INFO - finish!!

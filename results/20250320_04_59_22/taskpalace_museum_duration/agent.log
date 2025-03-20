@@ -1,0 +1,15 @@
+INFO - ########## TASKpalace_museum_duration ##########
+INFO - Iter: 0
+INFO - Calling Gemini API...
+INFO - AFC is enabled with max remote calls: 10.
+INFO - AFC remote call 1 is done.
+INFO - Gemini API call complete...
+INFO - Num of interactive elements: 19
+INFO - Iter: 1
+INFO - Calling Gemini API...
+INFO - AFC is enabled with max remote calls: 10.
+INFO - AFC remote call 1 is done.
+INFO - Gemini API call complete...
+INFO - Num of interactive elements: 36
+INFO - The museum brochure suggests a 60-minute to 90-minute plan. A TripAdvisor user mentioned spending 4 hours there.
+INFO - finish!!
