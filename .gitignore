@@ -1,0 +1,4 @@
+*.log
+downloads/*.pdf
+results/2025*
+__pycache__
