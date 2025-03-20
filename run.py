@@ -179,6 +179,7 @@ def call_gemini_api(args, gemini_client, messages, img):
             )
             call_error = False
             #print(gemini_response.text)
+            time.sleep(6)
             return call_error, gemini_response.text
         
         except google_exceptions.ResourceExhausted as e: #偵測是否超過上限
@@ -284,7 +285,7 @@ def exec_action_scroll(info, web_eles, driver_task, args, obs_info):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--test_file', type=str, default='data/test.json')
-    parser.add_argument('--max_iter', type=int, default=30)
+    parser.add_argument('--max_iter', type=int, default=50)
     parser.add_argument("--api_company", default="google", type=str) # 新argument-公司名
     parser.add_argument("--api_key", type=str, help="YOUR_API_KEY")
     parser.add_argument("--api_model", default="gemini-2.0-flash", type=str, help="api model name")
@@ -560,9 +561,9 @@ def main():
                 else:
                     fail_obs = ""
                 time.sleep(2)
+            print_message(history_messages, task_dir)
         print(info['content'])
         print('\t\t\t')
-        print_message(history_messages, task_dir)
         driver_task.quit()
         #logging.info(f'Total cost: {accumulate_prompt_token / 1000 * 0.01 + accumulate_completion_token / 1000 * 0.03}')
 

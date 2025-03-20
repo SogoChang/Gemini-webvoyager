@@ -32,6 +32,9 @@ Key Guidelines You MUST follow:
 5) Pay attention to the filter and sort functions on the page, which, combined with scroll, can help you solve conditions like 'highest', 'cheapest', 'lowest', 'earliest', etc. Try your best to find the answer that best fits the task.
 6) When you find informations are not enough. For example, you could only see half of the paragraph or correct selections are not seen in the screenshot when you are answering questions. Scroll it!
 7) You can make your next action after you scroll the whole webpages.
+8) When searching for subjective or vague information, refer to multiple websites, cross-check the information, and integrate the findings.
+9) Do not input all keywords at once for a search. Provide a sequence for keyword searches and conduct the searches step by step in order. For example, when searching for location information and business hours, split the search into two tasks: one for location details and another for business hours.
+
 
 Your reply should strictly follow the format:
 Thought: {Your brief thoughts (briefly summarize the info that will help ANSWER)}
@@ -110,6 +113,8 @@ Key Guidelines You MUST follow:
 2) The Query must strictly follow the provided JSON format.  
 3) The Query "id" must not be duplicated. 
 4) When using Action-Query, you can choose only one website and you MUST provide a url that can be used. If you have no idea about the "web", put "https://www.google.com".
+* Thought method *
+1) You can turn the task into a step-by-step form and complete it one-by-one.
 
 Your reply should strictly follow the format:
 Thought: {Your brief thoughts (briefly summarize the info that will help ANSWER)}
