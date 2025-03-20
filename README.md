@@ -34,8 +34,8 @@ The conversations of brain agent will be put inside the `brain_results` folder.
 - `run.py` run the webvoyager agent.
 - `utils.py` provide some functions about inner process of the webvoyager workflow.
 - `prompt.py` saves the prompt for brain agent and webvoyager agent.
-     - `SYSTEM_PROMPT` and `sYSTEM_PROMPT_TEXT_ONLY` are for webvoyager agent.
-     - `BRAIN_PROMPT` are for brain agent.
+     - `SYSTEM_PROMPT` and `SYSTEM_PROMPT_TEXT_ONLY` are for webvoyager agent.
+     - `BRAIN_PROMPT` is for brain agent.
 
 ## How it works
 The system consists of two agents. The first agent acts as the "brain," responsible for integrating information and breaking down tasks. It can actively request information from the user. The second agent is responsible for operating Webvoyager, ensuring that assigned tasks are completed. When the user inputs a task, the brain agent will decompose it. If more information is needed, it will ask the user. Then, it sequentially assigns the subtasks to the Webvoyager agent for processing (if needed). The Webvoyager agent interacts with the web environment to gather the required data. Once the brain agent determines that it has enough information to complete the user's task, it returns an answer and ends the session
