@@ -25,6 +25,6 @@ The conversations of webvoyager and log file will be put inside the results fold
 - `main.py` run the brain agent.
 - `run.py` run the webvoyager agent.
 - `utils.py` provide some functions about inner process of the webvoyager workflow.
-- `prompt.py` saves the prompt for brain agent and webvoyager agent. 
- - `SYSTEM_PROMPT` and `sYSTEM_PROMPT_TEXT_ONLY` are for webvoyager agent.
- - `BRAIN_PROMPT` are for brain agent.
+- `prompt.py` saves the prompt for brain agent and webvoyager agent.
+     - `SYSTEM_PROMPT` and `sYSTEM_PROMPT_TEXT_ONLY` are for webvoyager agent.
+     - `BRAIN_PROMPT` are for brain agent.
