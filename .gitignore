@@ -1,0 +1,6 @@
+*.log
+downloads/*.pdf
+results/2025*
+brain_results/2025*
+__pycache__
+examples/
