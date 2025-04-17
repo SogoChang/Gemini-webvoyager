@@ -66,7 +66,7 @@ def driver_config(args):
     return options
 
 
-def format_msg(it, init_msg, pdf_obs, warn_obs, web_text):
+def format_msg(it, init_msg, pdf_obs, warn_obs, web_text, reflection_mode=False, action_history=None):
     if it == 1:
         init_msg += f"I've provided the tag name of each element and the text it contains (if text exists). Note that <textarea> or <input> may be textbox, but not exactly. Please focus more on the screenshot and then refer to the textual information.\n{web_text}"
         init_msg_format = {
@@ -75,7 +75,29 @@ def format_msg(it, init_msg, pdf_obs, warn_obs, web_text):
         }
         return init_msg_format
     else:
-        if not pdf_obs:
+        if reflection_mode and action_history:
+            history_summary = "\n\nPrevious actions taken:\n"
+            for i, action in enumerate(action_history, 1):
+                history_summary += f"{i}. {action}\n"
+            
+            reflection_prompt = (
+                f"Observation:{warn_obs} We have performed {it} iterations and seem to be taking longer than expected to complete this task. "
+                f"Please analyze the attached screenshot and your previous actions. "
+                f"{history_summary}\n"
+                f"Take a moment to REFLECT: Are we making progress toward the goal? Is there a more efficient approach? "
+                f"Have we been repeating the same actions? Could we be stuck in a loop? "
+                f"After reflection, provide your Thought and Action for the next step. "
+                f"I've provided the tag name of each element and the text it contains (if text exists). "
+                f"Note that <textarea> or <input> may be textbox, but not exactly. "
+                f"Please focus more on the screenshot and then refer to the textual information.\n{web_text}"
+            )
+            
+            curr_msg = {
+                'role': 'user',
+                'content': reflection_prompt
+            }
+            return curr_msg
+        elif not pdf_obs:
             curr_msg = {
                 'role': 'user',
                 'content': 
@@ -92,7 +114,7 @@ def format_msg(it, init_msg, pdf_obs, warn_obs, web_text):
         return curr_msg
 
 
-def format_msg_text_only(it, init_msg, pdf_obs, warn_obs, ac_tree):
+def format_msg_text_only(it, init_msg, pdf_obs, warn_obs, ac_tree, reflection_mode=False, action_history=None):
     if it == 1:
         init_msg_format = {
             'role': 'user',
@@ -100,7 +122,26 @@ def format_msg_text_only(it, init_msg, pdf_obs, warn_obs, ac_tree):
         }
         return init_msg_format
     else:
-        if not pdf_obs:
+        if reflection_mode and action_history:
+            history_summary = "\n\nPrevious actions taken:\n"
+            for i, action in enumerate(action_history, 1):
+                history_summary += f"{i}. {action}\n"
+            
+            reflection_prompt = (
+                f"Observation:{warn_obs} We have performed {it} iterations and seem to be taking longer than expected to complete this task. "
+                f"Please analyze the accessibility tree and your previous actions. "
+                f"{history_summary}\n"
+                f"Take a moment to REFLECT: Are we making progress toward the goal? Is there a more efficient approach? "
+                f"Have we been repeating the same actions? Could we be stuck in a loop? "
+                f"After reflection, provide your Thought and Action for the next step.\n{ac_tree}"
+            )
+            
+            curr_msg = {
+                'role': 'user',
+                'content': reflection_prompt
+            }
+            return curr_msg
+        elif not pdf_obs:
             curr_msg = {
                 'role': 'user',
                 'content': f"Observation:{warn_obs} please analyze the accessibility tree and give the Thought and Action.\n{ac_tree}"
@@ -154,7 +195,7 @@ def call_gpt4v_api(args, openai_client, messages):
                 return None, None, gpt_call_error, None
 
         retry_times += 1
-        if retry_times == 10:
+        if retry_times == 15:
             logging.info('Retrying too many times')
             return None, None, True, None
         
@@ -206,7 +247,7 @@ def call_gemini_api(args, gemini_client, messages, img):
                 return None, None, gpt_call_error, None
 
         retry_times += 1
-        if retry_times == 10:
+        if retry_times == 15:
             logging.info('Retrying too many times')
             return None, None, True, None
 
@@ -295,6 +336,7 @@ def main():
     parser.add_argument("--temperature", type=float, default=0.5)
     parser.add_argument("--download_dir", type=str, default="downloads")
     parser.add_argument("--text_only", action='store_true')
+    parser.add_argument("--reflection_threshold", type=int, default=15, help="Number of iterations before triggering self-reflection")
     # for web browser
     parser.add_argument("--headless", action='store_true', help='The window of selenium')
     parser.add_argument("--save_accessibility_tree", action='store_true')
@@ -360,6 +402,7 @@ def main():
         pattern = r'Thought:|Action:|Observation:'
 
         history_messages = []
+        action_history = []  # Track actions for reflection
         obs_prompt = "Observation: please analyze the attached screenshot and give the Thought and Action. "
         if args.text_only:
             obs_prompt = "Observation: please analyze the accessibility tree and give the Thought and Action."
@@ -371,10 +414,21 @@ def main():
         it = 0
         accumulate_prompt_token = 0
         accumulate_completion_token = 0
+        reflection_intervals = [args.reflection_threshold]  # Start with the threshold
+        next_reflection = args.reflection_threshold
 
         while it < args.max_iter:
             logging.info(f'Iter: {it}')
             it += 1
+            
+            # Determine if this iteration should trigger reflection
+            should_reflect = it == next_reflection
+            if should_reflect:
+                logging.info(f'Triggering self-reflection at iteration {it}')
+                # Schedule next reflection - can be adjusted based on task complexity
+                next_reflection = it + args.reflection_threshold
+                reflection_intervals.append(next_reflection)
+            
             if not fail_obs:
                 try:
                     if not args.text_only:
@@ -402,11 +456,13 @@ def main():
                 # encode image
                 img = encode_image(img_path)
 
-                # format msg
+                # format msg with reflection if needed
                 if not args.text_only:
-                    curr_msg = format_msg(it, init_msg, pdf_obs, warn_obs, web_eles_text)
+                    curr_msg = format_msg(it, init_msg, pdf_obs, warn_obs, web_eles_text, 
+                                         reflection_mode=should_reflect, action_history=action_history)
                 else:
-                    curr_msg = format_msg_text_only(it, init_msg, pdf_obs, warn_obs, ac_tree)
+                    curr_msg = format_msg_text_only(it, init_msg, pdf_obs, warn_obs, ac_tree, 
+                                                  reflection_mode=should_reflect, action_history=action_history)
                 history_messages.append(curr_msg)
             else:
                 curr_msg = {
@@ -465,9 +521,15 @@ def main():
 
             # bot_thought = re.split(pattern, gpt_4v_res)[1].strip()
             chosen_action = re.split(pattern, response)[2].strip()
+            # Add the action to history for reflection
+            action_history.append(chosen_action)
+            # Keep history limited to last N actions to prevent large prompts
+            if len(action_history) > 15:
+                action_history = action_history[-15:]
+                
             # print(chosen_action)
             action_key, info = extract_information(chosen_action)
-
+            
             fail_obs = ""
             pdf_obs = ""
             warn_obs = ""
@@ -562,6 +624,11 @@ def main():
                     fail_obs = ""
                 time.sleep(2)
             print_message(history_messages, task_dir)
+        
+        # Log reflection information
+        logging.info(f"Task completed after {it} iterations")
+        logging.info(f"Reflection performed at iterations: {[i for i in reflection_intervals if i <= it]}")
+        
         print(info['content'])
         print('\t\t\t')
         driver_task.quit()
