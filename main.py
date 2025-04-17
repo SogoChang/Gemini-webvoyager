@@ -27,7 +27,7 @@ def use_gemini_webvoyager(task_path, api_key, task):
         my_env["PYTHONIOENCODING"] = "utf-8"
     
     result = subprocess.run(
-        [sys.executable, "run_v2.py", f"--test_file={task_path}", f"--api_key={api_key}"], 
+        [sys.executable, "run.py", f"--test_file={task_path}", f"--api_key={api_key}"], 
         capture_output=True, 
         text=False, 
         env=my_env
@@ -101,7 +101,7 @@ def use_attraction_agent(file_name, content, api_key):
         my_env["PYTHONIOENCODING"] = "utf-8"
     
     result = subprocess.run(
-        [sys.executable, "attraction_v2.py", f"--file_name={file_name}", f"--api_key={api_key}", f"--content={content}"], 
+        [sys.executable, "attraction.py", f"--file_name={file_name}", f"--api_key={api_key}", f"--content={content}"], 
         capture_output=True, 
         text=False,
         env=my_env
