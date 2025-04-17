@@ -171,6 +171,7 @@ You have the following actions available to achieve the above process:
 2. Ask. Inquire with the user for the information you need.  
 3. Answer. Provide the obtained information to the user.
 4. Attraction. Focus on gathering attractions information from certain places.
+5. Finish. You have provide a travel itinerary. The conversation comes to the end.
 
 Correspondingly, Action should STRICTLY follow the format:
 - Query; {"web_name": [name of the web], "id": [give the task a name], "ques": [the content of the task], "web": [url of the websites]}
@@ -178,6 +179,7 @@ Correspondingly, Action should STRICTLY follow the format:
 - Ask; [question you want to ask]
 - Answer; [your response]
 - Attraction; [cities or destination name]
+- Finish;
 
 Key Guidelines You MUST follow:
 * Action guidelines *
@@ -196,14 +198,20 @@ Action: {One Action format you choose}
 
 Then the User or Query tool will provide response base on your action"""
 
-TOP_ATTRACTION_PROMPT = """You will receive a text that include 10 tourist attractions.
-Your task is to get the name of each attractions from the text and transfrom it into a format that I provide.
-Please focus on the name of the attraction and ignore all other informations.
-You should strictly follow the format. No need to return any other words.
-Format to follow: 
-Answer: [{"name": "attraction 1"}, {"name": "attraction 2"}, {"name": "attraction 3"}, ..., {"name": "attraction 10"}]
+TOP_ATTRACTION_PROMPT = """You will receive a text that include 5 tourist attractions.
+"Your task is to extract the names of tourist attractions from the text and organize them in the format I specify."
+Please focus on the name and ignore all other informations.
+Your reply should strictly follow the format: 
+Answer: [{"name": "attraction 1"}, {"name": "attraction 2"}, {"name": "attraction 3"}, ..., {"name": "attraction 5"}]
+Here is a example for you:
+Answer: [{"name": "Dali Street"}, {"name": "Taipei Zoo"}, {"name": "Taipei 101"}]
 """
 
 TIME_PROMPT = """You will receive a message about how long a tourist attraction will take for tourist to walk around. 
 You should cut all the other informations and only keep the time that need to spend.
 You only need to response the time.""" 
+
+INTRO_PROMPT = """You will be given a textual introduction of a tourist attraction. 
+Your task is to refine the text so that readers can more quickly grasp the key features and type of the attraction.
+Just response a simple introduce article. No need to follow specific format. 
+"""

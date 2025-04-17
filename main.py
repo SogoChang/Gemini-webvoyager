@@ -9,8 +9,10 @@ import json
 import time
 import os
 from time import sleep
+import io
 
 def use_gemini_webvoyager(task_path, api_key, task):
+    # Ensure UTF-8 encoding when writing to files
     with open(task_path, "w", encoding="utf-8") as f:
         if type(task) == str:
             task = '{'+task+'}'
@@ -18,17 +20,22 @@ def use_gemini_webvoyager(task_path, api_key, task):
         else:
             json_line = json.dumps(task, ensure_ascii=False)
         f.write(json_line)
-    result = subprocess.run([sys.executable, "run.py", f"--test_file={task_path}", f"--api_key={api_key}"], capture_output=True, text=False)
     
-    try:
-        stdout = result.stdout.decode('utf-8')
-    except UnicodeDecodeError:
-        stdout = result.stdout.decode('utf-8', errors='replace')
-        
-    try:
-        stderr = result.stderr.decode('utf-8')
-    except UnicodeDecodeError:
-        stderr = result.stderr.decode('utf-8', errors='replace')
+    # Use UTF-8 locale environment for subprocess
+    my_env = os.environ.copy()
+    if sys.platform.startswith('win'):
+        my_env["PYTHONIOENCODING"] = "utf-8"
+    
+    result = subprocess.run(
+        [sys.executable, "run_v2.py", f"--test_file={task_path}", f"--api_key={api_key}"], 
+        capture_output=True, 
+        text=False, 
+        env=my_env
+    )
+    
+    # Always decode with UTF-8, use 'replace' for any problematic characters
+    stdout = result.stdout.decode('utf-8', errors='replace')
+    stderr = result.stderr.decode('utf-8', errors='replace')
         
     class TextResult:
         pass
@@ -45,7 +52,8 @@ def extract_information(text):
         "query": r"Query[; ]+\{([^}]*)\}",
         "ask": r"Ask[; ]+\[?(.[^\]]*)\]?",
         "answer": r"Answer[; ]+\[?(.[^\]]*)\]?",
-        "attraction": r"Attraction[; ]+\[?(.[^\]]*)\]?"
+        "attraction": r"Attraction[; ]+\[?(.[^\]]*)\]?",
+        "finish": r"Finish[; ]+"
     }
 
     for key, pattern in patterns.items():
@@ -57,13 +65,25 @@ def extract_information(text):
                 return key, match.group(1)
             elif key == "attraction":
                 return key, match.group(1)
+            elif key == "finish":
+                return key, None
             else:
                 return key, match.group(1)
     return None, None
 
 def ask_action(content):
-    text = input(content)
-    return text
+    # Make sure the input prompt is displayed correctly
+    if sys.platform.startswith('win'):
+        try:
+            print(content, end='', flush=True)
+            return input()
+        except UnicodeEncodeError:
+            # Fallback for Windows console with encoding issues
+            print(content.encode('utf-8', errors='replace').decode(sys.stdout.encoding, errors='replace'), end='', flush=True)
+            return input()
+    else:
+        # For Unix systems, should work with UTF-8 by default
+        return input(content)
 
 def print_message(object, save_dir=None):
     if save_dir:
@@ -71,17 +91,25 @@ def print_message(object, save_dir=None):
             fw.write(object)
 
 def use_attraction_agent(file_name, content, api_key):
-    result = subprocess.run([sys.executable, "attraction.py", f"--file_name={file_name}", f"--api_key={api_key}", f"--content={content}"], capture_output=True, text=False)
+    # Ensure content is properly encoded
+    if isinstance(content, str):
+        content = content.encode('utf-8', errors='replace').decode('utf-8')
     
-    try:
-        stdout = result.stdout.decode('utf-8')
-    except UnicodeDecodeError:
-        stdout = result.stdout.decode('utf-8', errors='replace')
-        
-    try:
-        stderr = result.stderr.decode('utf-8')
-    except UnicodeDecodeError:
-        stderr = result.stderr.decode('utf-8', errors='replace')
+    # Use UTF-8 locale environment for subprocess
+    my_env = os.environ.copy()
+    if sys.platform.startswith('win'):
+        my_env["PYTHONIOENCODING"] = "utf-8"
+    
+    result = subprocess.run(
+        [sys.executable, "attraction_v2.py", f"--file_name={file_name}", f"--api_key={api_key}", f"--content={content}"], 
+        capture_output=True, 
+        text=False,
+        env=my_env
+    )
+    
+    # Always decode with UTF-8, use 'replace' for any problematic characters
+    stdout = result.stdout.decode('utf-8', errors='replace')
+    stderr = result.stderr.decode('utf-8', errors='replace')
         
     class TextResult:
         pass
@@ -94,6 +122,13 @@ def use_attraction_agent(file_name, content, api_key):
     return text_result
 
 if __name__ == "__main__":
+    # Configure for UTF-8 encoding in stdout/stderr
+    if sys.platform.startswith('win'):
+        # For Windows, try to set console to UTF-8 mode
+        os.system("chcp 65001")
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+    
     parser = argparse.ArgumentParser()
     parser.add_argument("--api_key", type=str, help="YOUR_API_KEY")
     args = parser.parse_args()
@@ -146,14 +181,17 @@ if __name__ == "__main__":
                 os.mkdir(attraction_folder)
             attraction_response = use_attraction_agent(content=content, api_key=api_key, file_name=file_name)
             if attraction_response.stderr != '':
-                print(attraction_response.stderr)
+                print('error:',attraction_response.stderr)
                 break
-            print(attraction_response.stdout)
-            attraction_info = str(json.load(open(os.path.join(attraction_folder, file_name), 'r')))
+            print('text:',attraction_response.stdout)
+            with open(os.path.join(attraction_folder, file_name), 'r', encoding='utf-8') as f:
+                attraction_info = str(json.load(f))
             history_messages += "{role: attraction, content: " + attraction_info + "}\n"
-        else:
-            print(key)
-            print(content)
-            history_messages += "{role: answer, content: " + content + "}\n"
-            print_message(history_messages, result_dir)
+        elif key == 'finish':
+            print("Finish conversation")
             break
+        else:
+            history_messages += "{role: answer, content: " + content + "}\n"
+            reply = ask_action(content)
+            history_messages += "{role: user, content: " + reply + "}\n"
+            print_message(history_messages, result_dir)
