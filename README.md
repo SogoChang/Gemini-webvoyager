@@ -5,7 +5,7 @@
 
 This system is build base on [WebVoyager](https://github.com/MinorJerry/WebVoyager) but with several changes and upgrade. 
 The final goal is to develop an Agentic AI tool that assists users in planning their travel itineraries. 
-But currently, it has only the ability to retrieve information, plan tasks, and interact with users.
+But currently, it has only the ability to make simple itineraries without concerning accommodation and food.
 
 
 ## Setup Environment
@@ -28,14 +28,19 @@ python main.py --api_key YOUR_GEMINI_API_KEY
 ```
 The conversations of webvoyager and log file will be put inside the `results` folder, corresponding to the task name provide by brain agent.
 The conversations of brain agent will be put inside the `brain_results` folder.
+The structured storage information of tourist attractions will be put inside the `attraction` folder.
 
 ## File introduction
 - `main.py` run the brain agent.
 - `run.py` run the webvoyager agent.
+- `attraction.py` gather the information of tourist attraction in a specify method.
 - `utils.py` provide some functions about inner process of the webvoyager workflow.
 - `prompt.py` saves the prompt for brain agent and webvoyager agent.
      - `SYSTEM_PROMPT` and `SYSTEM_PROMPT_TEXT_ONLY` are for webvoyager agent.
-     - `BRAIN_PROMPT` is for brain agent.
+     - `NEW_BRAIN_PROMPT` is for brain agent.
+     - `TOP_ATTRACTION_PROMPT`, `TIME_PROMPT`, `INTRO_PROMPT` are for attraction agent.
 
 ## How it works
-The system consists of two agents. The first agent acts as the "brain," responsible for integrating information and breaking down tasks. It can actively request information from the user. The second agent is responsible for operating Webvoyager, ensuring that assigned tasks are completed. When the user inputs a task, the brain agent will decompose it. If more information is needed, it will ask the user. Then, it sequentially assigns the subtasks to the Webvoyager agent for processing (if needed). The Webvoyager agent interacts with the web environment to gather the required data. Once the brain agent determines that it has enough information to complete the user's task, it returns an answer and ends the session
+![image](https://github.com/user-attachments/assets/7c8f4531-24b7-47a9-a9cd-dc0a54dcc5ca)
+
+The arrows represent the direction of the command, Brain Agent are able to use all the tools and request every parts. Attraction Agent are able to request Webnoyager Agent to provide informations about the attraction. The direction of information transporting is totally the opposite direction of the command & request. Webvoyager Agent and User Interact gather informations from user and web environment. The Attraction Agent save the information into structured storage. The Brain Agent combine all the informations and design travel schedule.
